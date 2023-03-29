@@ -3,6 +3,7 @@ import json
 import numpy as np
 import textwrap
 import re
+from pdf_to_txt import update_txt_folder
 from time import time,sleep
 import os
 import io
@@ -69,6 +70,8 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, toke
 
 
 if __name__ == '__main__':
+    #Update txt folder with new pdf's plaved in google drive
+    update_txt_folder();
     with open('index.json', 'r') as infile:
         data = json.load(infile)
     #print(data)
