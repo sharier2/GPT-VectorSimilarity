@@ -1,6 +1,7 @@
 import os
 import io
 import shutil
+from build_index import build_index
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -26,12 +27,12 @@ def pdf_exists_as_txt(pdf_name, txt_files):
 
     return False
 
-def upload_file_to_drive_folder(folder_id, service, file_path, actual_file_name):
+def upload_file_to_drive_folder(folder_id, service, file_path, actual_file_name, ext):
 
     try:
         # Define file metadata
         file_name = os.path.basename(file_path)
-        file_metadata = {'name': actual_file_name + ".txt", 'parents': [folder_id]}
+        file_metadata = {'name': actual_file_name + ext, 'parents': [folder_id]}
 
         # Upload file to the folder
         media = MediaFileUpload(file_path, resumable=True)
@@ -60,7 +61,7 @@ def get_files_from_drive_folder(folder_id, service):
     return results.get('files', [])
 
 
-def update_txt_folder():
+def update_google_drive_folders():
     # Service account credentials
     creds = service_account.Credentials.from_service_account_file('credentials.json')
 
@@ -69,6 +70,9 @@ def update_txt_folder():
 
     # ID of folder for txt's
     txt_folder_id = '1rNZrv06u_kg9zdoa6D-i82zFfk1QE1tB'
+
+    # ID of folder for indexes
+    index_folder_id = '1Jsn9j_Sp_nvpiY1ZiACpDf_nAQkI98sQ'
 
     # Connect to the Google Drive API
     service = build('drive', 'v3', credentials=creds)
@@ -86,7 +90,7 @@ def update_txt_folder():
         # if not os.path.exists('pdf_files'):
         #     os.makedirs('pdf_files')
 
-        # Download each PDF file to the directory
+        # Convert new files to txt then index
         for pdf_file in pdf_files:
             try:
                 file_id = pdf_file['id']
@@ -105,9 +109,19 @@ def update_txt_folder():
 
                     pdf_to_txt("research.pdf", "research.txt")
 
-                    upload_file_to_drive_folder(txt_folder_id, service, "research.txt", file_name_without_ext)
+                    # Upload txt file to google drive folder
+                    upload_file_to_drive_folder(txt_folder_id, service, "research.txt", file_name_without_ext, '.txt')
 
-                    print('Downloaded file: {}'.format(file_name))
+                    print('Converted file: {} to txt'.format(file_name))
+
+                    print('Converting \"' + file_name_without_ext + '\" to index...')
+
+                    build_index('research.txt')
+
+                    # Upload index to google drive folder
+                    upload_file_to_drive_folder(index_folder_id, service, "index.json", file_name_without_ext, '.json')
+
+                    print('Converted file: {} to index'.format(file_name))
 
             except HttpError as error:
                 print('An error occurred: {}'.format(error))
@@ -116,6 +130,6 @@ def update_txt_folder():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    update_txt_folder()
+    update_google_drive_folders()
 
 
