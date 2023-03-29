@@ -4,6 +4,9 @@ import numpy as np
 import textwrap
 import re
 from time import time,sleep
+import os
+import io
+from decouple import config
 
 
 def open_file(filepath):
@@ -11,7 +14,7 @@ def open_file(filepath):
         return infile.read()
 
 
-openai.api_key = open_file('openaiapikey.txt')
+openai.api_key = config("APIKEY")
 
 
 def gpt3_embedding(content, engine='text-similarity-ada-001'):

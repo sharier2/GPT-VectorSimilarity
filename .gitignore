@@ -1,1 +1,5 @@
-openaiapikey.txt
+# Default ignored files
+/shelf/
+/workspace.xml
+.env
+/venv
