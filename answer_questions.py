@@ -15,9 +15,6 @@ def open_file(filepath):
         return infile.read()
 
 
-openai.api_key = config("APIKEY")
-
-
 def gpt3_embedding(content, engine='text-similarity-ada-001'):
     content = content.encode(encoding='ASCII',errors='ignore').decode()
     response = openai.Embedding.create(input=content,engine=engine)
@@ -69,22 +66,23 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, toke
             sleep(1)
 
 
-if __name__ == '__main__':
+def queryGPT(text):
+    openai.api_key = config("APIKEY")
     #Update txt folder with new pdf's plaved in google drive
     update_google_drive_folders()
     with open('index.json', 'r') as infile:
         data = json.load(infile)
     #print(data)
     while True:
-        query = input("Enter your question here: ")
+        # query = input("Enter your question here: ")
         #print(query)
-        results = search_index(query, data)
+        results = search_index(text, data)
         #print(results)
         #exit(0)
         answers = list()
         # answer the same question for all returned chunks
         for result in results:
-            prompt = open_file('prompt_answer.txt').replace('<<PASSAGE>>', result['content']).replace('<<QUERY>>', query)
+            prompt = open_file('prompt_answer.txt').replace('<<PASSAGE>>', result['content']).replace('<<QUERY>>', text)
             answer = gpt3_completion(prompt)
             print('\n\n', answer)
             answers.append(answer)
@@ -97,3 +95,8 @@ if __name__ == '__main__':
             summary = gpt3_completion(prompt)
             final.append(summary)
         print('\n\n=========\n\n', '\n\n'.join(final))
+        return final
+        
+
+if __name__ == '__main__':
+    queryGPT()

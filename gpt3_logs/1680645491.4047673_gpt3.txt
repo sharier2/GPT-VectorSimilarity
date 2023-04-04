@@ -1,0 +1,18 @@
+PROMPT:
+
+Use the following passage to give a detailed answer to the question:
+
+
+QUESTION: & C:/Users/user4/AppData/Local/Programs/Python/Python311/python.exe e:/CSE/GPT-Vector/GPT-VectorSimilarity/answer_questions.py
+
+
+PASSAGE: Springer, Berlin, 2007, pp. 226240, , https:// doi.org/10.1007/978-3-540-74200-5_13. [20] B. Pradhan, A comparative study on the predictive ability of the decision tree, support vector machine and neuro-fuzzy models in landslide susceptibility mapping using GIS, Comput. Geosci. 51 (2013) 350365, https://doi.org/10.1016/j.cageo. 2012.08.023. [21] C.F.J. Wu, Bootstrap and other resampling methods in regression analysis, Ann. Stat. 14 (4) (1986) 12611295, https://doi.org/10.1214/aos/1176350142. Z. Liu and S. Li Autom ation in Construction 113 (2020) 103125 7
+
+
+DETAILED ANSWER:
+
+==========
+
+RESPONSE:
+
+According to the passage, the three models (decision tree, support vector machine, and neuro-fuzzy) all have predictive ability in landslide susceptibility mapping. However, the decision tree model is more accurate than the other two models.
