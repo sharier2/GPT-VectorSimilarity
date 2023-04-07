@@ -13,8 +13,8 @@ def index():
 def result():
     text = request.form['text']
     # Call your Python function here and pass in the text
-    output = my_python_function(text)
-    return render_template('result.html', output=output)
+    summary, answers = my_python_function(text)
+    return render_template('result.html', summary=summary, answers=answers)
 
 def my_python_function(text):
     # Add your Python code here

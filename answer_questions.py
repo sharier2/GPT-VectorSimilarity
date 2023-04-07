@@ -4,6 +4,8 @@ import numpy as np
 import textwrap
 import re
 from pdf_to_txt_to_index import update_google_drive_folders
+from pdf_to_txt_to_index import get_files_from_drive_folder
+from pdf_to_txt_to_index import download_file_from_drive
 from time import time,sleep
 import os
 import io
@@ -26,13 +28,20 @@ def similarity(v1, v2):  # return dot product of two vectors
     return np.dot(v1, v2)
 
 
-def search_index(text, data, count=20):
+def search_index(text, index_files, service, count=20):
     vector = gpt3_embedding(text)
     scores = list()
-    for i in data:
-        score = similarity(vector, i['vector'])
-        #print(score)
-        scores.append({'content': i['content'], 'score': score})
+    # Loop through each index file in index folder
+    for index_file in index_files:
+        # Download and open index file
+        download_file_from_drive(service, index_file['id'], "index.json")
+        with open('index.json', 'r') as infile:
+            data = json.load(infile)
+
+        for i in data:
+            score = similarity(vector, i['vector'])
+            #print(score)
+            scores.append({'content': i['content'], 'score': score, 'source': index_file['name']})
     ordered = sorted(scores, key=lambda d: d['score'], reverse=True)
     return ordered[0:count]
 
@@ -67,16 +76,22 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, toke
 
 
 def queryGPT(text):
+    # ID of folder for indexes
+    index_folder_id = '1Jsn9j_Sp_nvpiY1ZiACpDf_nAQkI98sQ'
+
     openai.api_key = config("APIKEY")
     #Update txt folder with new pdf's plaved in google drive
-    update_google_drive_folders()
-    with open('index.json', 'r') as infile:
-        data = json.load(infile)
+    service = update_google_drive_folders()
+    # Get all files within the index folder
+    index_files = get_files_from_drive_folder(index_folder_id, service)
+    #with open('index.json', 'r') as infile:
+       # data = json.load(infile)
     #print(data)
     while True:
         # query = input("Enter your question here: ")
         #print(query)
-        results = search_index(text, data)
+        # Get search results, searching through every index in the index folder
+        results = search_index(text, index_files, service)
         #print(results)
         #exit(0)
         answers = list()
@@ -85,9 +100,9 @@ def queryGPT(text):
             prompt = open_file('prompt_answer.txt').replace('<<PASSAGE>>', result['content']).replace('<<QUERY>>', text)
             answer = gpt3_completion(prompt)
             print('\n\n', answer)
-            answers.append(answer)
+            answers.append({'answer': answer, 'source': result['source']})
         # summarize the answers together
-        all_answers = '\n\n'.join(answers)
+        all_answers = '\n\n'.join([answer_dict['answer'] for answer_dict in answers])
         chunks = textwrap.wrap(all_answers, 10000)
         final = list()
         for chunk in chunks:
@@ -95,7 +110,7 @@ def queryGPT(text):
             summary = gpt3_completion(prompt)
             final.append(summary)
         print('\n\n=========\n\n', '\n\n'.join(final))
-        return final
+        return final, answers
         
 
 if __name__ == '__main__':

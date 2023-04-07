@@ -9,6 +9,8 @@ from googleapiclient.http import MediaFileUpload
 import fitz # PyMuPDF
 
 
+
+
 def pdf_to_txt(pdf_path, txt_path):
     with fitz.open(pdf_path) as pdf:
         text = ""
@@ -125,6 +127,8 @@ def update_google_drive_folders():
 
             except HttpError as error:
                 print('An error occurred: {}'.format(error))
+
+    return service;
 
 
 

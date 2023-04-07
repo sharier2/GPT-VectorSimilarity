@@ -4,7 +4,14 @@
     <title>My App</title>
 </head>
 <body>
-    <h1>Result:</h1>
-    <p>{{ output }}</p>
+    <h1>Summary:</h1>
+    <p>{{ summary }}</p>
+
+    <h1>Answers:</h1>
+    <ul>
+    {% for answer in answers %}
+        <li>{{ answer.answer }} (from {{ answer.source }})</li>
+    {% endfor %}
+    </ul>
 </body>
 </html>
