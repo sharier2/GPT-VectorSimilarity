@@ -25,7 +25,26 @@ SERVICE = build('drive', 'v3', credentials=CREDS)
 
 
 def get_pdf_link(file_name):
-    pdf_files = 0
+    try:
+
+        file_name  = file_name + ".pdf"
+        # Query the PDF folder to retrieve the PDF files
+        query = f"'{PDF_FOLDER_ID}' in parents and trashed = false and mimeType = 'application/pdf' and name = '{file_name}'"
+        response = SERVICE.files().list(q=query, fields='files(id, webContentLink)').execute()
+        pdf_files = response.get('files', [])
+    except HttpError as error:
+        print(f'An error occurred while retrieving the PDF files: {error}')
+
+    if len(pdf_files) == 0:
+        # PDF file not found
+        return None
+    elif len(pdf_files) > 1:
+        # More than one PDF file found with the same name
+        print(f'Multiple PDF files found with the name "{file_name}". Returning the first one.')
+
+        # Return the web content link of the first PDF file found
+    return pdf_files[0]['webContentLink']
+
 
 def pdf_to_txt(pdf_path, txt_path):
     with fitz.open(pdf_path) as pdf:

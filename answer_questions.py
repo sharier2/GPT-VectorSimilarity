@@ -97,7 +97,7 @@ def queryGPT(text):
             prompt = open_file('prompt_answer.txt').replace('<<PASSAGE>>', result['content']).replace('<<QUERY>>', text)
             answer = gpt3_completion(prompt)
             print('\n\n', answer)
-            answers.append({'answer': answer, 'source': result['source']})
+            answers.append({'answer': answer, 'source': result['source'], 'link': result['link']})
         # summarize the answers together
         all_answers = '\n\n'.join([answer_dict['answer'] for answer_dict in answers])
         chunks = textwrap.wrap(all_answers, 10000)
@@ -107,7 +107,7 @@ def queryGPT(text):
             summary = gpt3_completion(prompt)
             final.append(summary)
         print('\n\n=========\n\n', '\n\n'.join(final))
-        return final, answers
+        return final[0], answers
         
 
 if __name__ == '__main__':

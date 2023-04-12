@@ -62,7 +62,7 @@
     <h1>Answers:</h1>
     <ul>
         {% for answer in answers %}
-            <li>{{ answer.answer }} (from {{ answer.source }})</li>
+            <li>{{ answer.answer }} (from <a href="{{ answer.link }}">{{ answer.source }}</a>)</li>
         {% endfor %}
     </ul>
 </div>
