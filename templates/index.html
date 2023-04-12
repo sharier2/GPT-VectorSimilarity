@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My App</title>
+    <title>GPT App</title>
 </head>
 <body>
-    <h1>Enter some text:</h1>
-    <form action="/result" method="post">
+    <h1>Please enter a query:</h1>
+    <form action="/" method="post">
         <input type="text" name="text">
         <input type="submit" value="Submit">
     </form>
+    <h1>Summary:</h1>
+    <p>{{ summary }}</p>
+
+    <h1>Answers:</h1>
+    <ul>
+    {% for answer in answers %}
+        <li>{{ answer.answer }} (from {{ answer.source }})</li>
+    {% endfor %}
+    </ul>
 </body>
 </html>

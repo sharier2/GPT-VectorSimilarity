@@ -9,14 +9,14 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-@app.route('/result', methods=['POST'])
+@app.route('/', methods=['POST'])
 def result():
     text = request.form['text']
     # Call your Python function here and pass in the text
-    summary, answers = my_python_function(text)
-    return render_template('result.html', summary=summary, answers=answers)
+    summary, answers = GPTfromWebsite(text)
+    return render_template('index.html', summary=summary, answers=answers)
 
-def my_python_function(text):
+def GPTfromWebsite(text):
     # Add your Python code here
     openai.api_key = config("APIKEY")
     return answer_questions.queryGPT(text)
