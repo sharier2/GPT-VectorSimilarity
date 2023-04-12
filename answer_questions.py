@@ -3,9 +3,7 @@ import json
 import numpy as np
 import textwrap
 import re
-from pdf_to_txt_to_index import update_google_drive_folders
-from pdf_to_txt_to_index import get_files_from_drive_folder
-from pdf_to_txt_to_index import download_file_from_drive
+from pdf_to_txt_to_index import update_google_drive_folders, get_files_from_drive_folder, download_file_from_drive, get_pdf_link, INDEX_FOLDER_ID
 from time import time,sleep
 import os
 import io
@@ -28,20 +26,21 @@ def similarity(v1, v2):  # return dot product of two vectors
     return np.dot(v1, v2)
 
 
-def search_index(text, index_files, service, count=20):
+def search_index(text, index_files, count=20):
     vector = gpt3_embedding(text)
     scores = list()
     # Loop through each index file in index folder
     for index_file in index_files:
         # Download and open index file
-        download_file_from_drive(service, index_file['id'], "index.json")
+        download_file_from_drive(index_file['id'], "index.json")
         with open('index.json', 'r') as infile:
             data = json.load(infile)
 
         for i in data:
             score = similarity(vector, i['vector'])
             #print(score)
-            scores.append({'content': i['content'], 'score': score, 'source': index_file['name']})
+            file_name = os.path.splitext(os.path.basename(index_file['name']))[0]
+            scores.append({'content': i['content'], 'score': score, 'source': file_name, 'link': get_pdf_link(file_name)})
     ordered = sorted(scores, key=lambda d: d['score'], reverse=True)
     return ordered[0:count]
 
@@ -76,14 +75,12 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, toke
 
 
 def queryGPT(text):
-    # ID of folder for indexes
-    index_folder_id = '1Jsn9j_Sp_nvpiY1ZiACpDf_nAQkI98sQ'
 
     openai.api_key = config("APIKEY")
     #Update txt folder with new pdf's plaved in google drive
-    service = update_google_drive_folders()
+    update_google_drive_folders()
     # Get all files within the index folder
-    index_files = get_files_from_drive_folder(index_folder_id, service)
+    index_files = get_files_from_drive_folder(INDEX_FOLDER_ID)
     #with open('index.json', 'r') as infile:
        # data = json.load(infile)
     #print(data)
@@ -91,7 +88,7 @@ def queryGPT(text):
         # query = input("Enter your question here: ")
         #print(query)
         # Get search results, searching through every index in the index folder
-        results = search_index(text, index_files, service)
+        results = search_index(text, index_files)
         #print(results)
         #exit(0)
         answers = list()

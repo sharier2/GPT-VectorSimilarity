@@ -23,7 +23,7 @@ def GPTfromWebsite(text):
     return answer_questions.queryGPT(text)
 
 @app.route('/logo')
-def image():
+def logo():
     return send_file('Images/ETL_logo.png', mimetype='image/png')
 
 if __name__ == '__main__':
