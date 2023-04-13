@@ -129,7 +129,7 @@ def queryGPT(text):
             summary = gpt3_completion(prompt)
             final.append(summary)
         print('\n\n=========\n\n', '\n\n'.join(final))
-        return final[0], answers
+        return final, answers
 
 
 if __name__ == '__main__':
