@@ -1,3 +1,4 @@
+from time import time,sleep
 import openai
 import json
 import textwrap
@@ -15,11 +16,24 @@ openai.api_key = config("APIKEY")
 
 
 def gpt3_embedding(content, engine='text-similarity-ada-001'):
-    response = openai.Embedding.create(input=content,engine=engine)
-    vector = response['data'][0]['embedding']  # this is a normal list
-    return vector
+    retry = 0;
+    max_retry = 5
+    while True:
+        try:
+            response = openai.Embedding.create(input=content, engine=engine)
+            vector = response['data'][0]['embedding']  # this is a normal list
+            return vector
 
-def build_index(research_file = 'research.txt'):
+        except Exception as oops:
+            retry += 1
+            if retry >= max_retry:
+                return "GPT3 error: %s" % oops
+            print('Error communicating with OpenAI:', oops)
+            sleep(5)
+
+
+
+def build_index(research_file='research.txt'):
     alltext = open_file(research_file)
     chunks = textwrap.wrap(alltext, 4000)
     result = list()
@@ -31,7 +45,8 @@ def build_index(research_file = 'research.txt'):
     with open('index.json', 'w') as outfile:
         json.dump(result, outfile, indent=2)
 
+
 if __name__ == '__main__':
     build_index()
 
-        #test
+    # test
