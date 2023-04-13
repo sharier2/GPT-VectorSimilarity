@@ -14,7 +14,7 @@ def result():
     text = request.form['text']
     # Call your Python function here and pass in the text
     summary, answers = GPTfromWebsite(text)
-    return render_template('index.html', summary=summary, answers=answers)
+    return render_template('index.html', summary=summary, answers=answers, prompt=text)
 
 def GPTfromWebsite(text):
     # Add your Python code here

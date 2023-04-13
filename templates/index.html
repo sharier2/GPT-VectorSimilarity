@@ -50,18 +50,20 @@
 <body>
 <div class="container">
     <img src="/logo" alt="ETL" class="logo">
-    <h1>Please enter a query:</h1>
+    <h1>Please enter a question:</h1>
     <form action="/" method="post">
         <div class="form-group">
             <input type="text" class="form-control" name="text">
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
+    <h1>Your Question:</h1>
+    <p>{{ prompt }}</p>
     <h1>Summary:</h1>
     {% for paragraph in summary %}
         <p>{{ paragraph }}</p>
     {% endfor %}
-    <h1>Answers:</h1>
+    <h1>Bibliography:</h1>
     <ul>
         {% for answer in answers %}
             <li>{{ answer.answer }} (from <a href="{{ answer.link }}">{{ answer.source }}</a>)</li>
