@@ -45,6 +45,12 @@
             width: 200px;
             height: auto;
         }
+
+        #download-btn {
+            display: none;
+            margin-top: 20px;
+        }
+
     </style>
 </head>
 <body>
@@ -57,18 +63,41 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
-    <h1>Your Question:</h1>
-    <p>{{ prompt }}</p>
-    <h1>Summary:</h1>
-    {% for paragraph in summary %}
-        <p>{{ paragraph }}</p>
-    {% endfor %}
-    <h1>Bibliography:</h1>
-    <ul>
-        {% for answer in answers %}
-            <li>{{ answer.answer }} (from <a href="{{ answer.link }}">{{ answer.source }}</a>)</li>
+    <button id="download-btn" class="btn btn-primary">Download Results</button>
+    {% if summary %}
+        <h1>Your Question:</h1>
+        <p>{{ prompt }}</p>
+        <h1>Summary:</h1>
+
+        {% for paragraph in summary %}
+            <p>{{ paragraph }}</p>
         {% endfor %}
-    </ul>
+
+        <h1>Bibliography:</h1>
+        <ul>
+            {% for answer in answers %}
+                <li>{{ answer.answer }} (from <a href="{{ answer.link }}">{{ answer.source }}</a>)</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </div>
+{% if summary %}
+    <script>
+        let now = new Date();
+        const downloadBtn = document.querySelector('#download-btn');
+        downloadBtn.style.display = 'block';
+        downloadBtn.addEventListener('click', function () {
+            const text = '{{ prompt }}\n\nSummary:\n{% for paragraph in summary %}{{ paragraph }}\n{% endfor %}\n\nBibliography:\n{% for answer in answers %}{{ answer.answer }} (from {{ answer.source }})\n\n{% endfor %}';
+            const filename = 'results_' + now.toLocaleString().replaceAll(' ', '-') + '.txt';
+            const blob = new Blob([text], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = url;
+            link.click();
+        });
+    </script>
+{% endif %}
+
 </body>
 </html>
