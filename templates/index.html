@@ -58,7 +58,9 @@
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
     <h1>Summary:</h1>
-    <p>{{ summary }}</p>
+    {% for paragraph in summary %}
+        <p>{{ paragraph }}</p>
+    {% endfor %}
     <h1>Answers:</h1>
     <ul>
         {% for answer in answers %}
