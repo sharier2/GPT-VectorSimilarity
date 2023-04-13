@@ -113,8 +113,6 @@ def queryGPT(text):
         # print(query)
         # Get search results, searching through every index in the index folder
         results = search_index(text, index_files)
-        # print(results)
-        # exit(0)
         answers = list()
         # answer the same question for all returned chunks
         for result in results:

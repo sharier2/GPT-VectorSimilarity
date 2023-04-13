@@ -48,5 +48,3 @@ def build_index(research_file='research.txt'):
 
 if __name__ == '__main__':
     build_index()
-
-    # test
