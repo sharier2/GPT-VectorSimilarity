@@ -4,8 +4,10 @@
     <title>GPT App</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel = "stylesheet" href = "{{ url_for('static', filename='stylesheets/homepage.css') }}">
+    <link rel = "stylesheet" href = "{{ url_for('static', filename='stylesheets/loading.css') }}">
 </head>
 <body>
+<div id="loading-overlay"></div>
 <div class="container">
     <img src="/logo" alt="ETL" class="logo">
     <h1>Please enter a question:</h1>
@@ -13,7 +15,7 @@
         <div class="form-group">
             <input type="text" class="form-control" name="text">
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button onclick="showLoading()" type="submit" class="btn btn-primary">Submit</button>
     </form>
     <button id="download-btn" class="btn btn-primary">Download Results</button>
     {% if summary %}
@@ -50,6 +52,13 @@
         });
     </script>
 {% endif %}
+
+<script>
+    function showLoading() {
+        const overlay = document.getElementById("loading-overlay");
+        overlay.style.display = "block";
+    }
+</script>
 
 </body>
 </html>
