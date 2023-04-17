@@ -36,7 +36,7 @@ def worker(data, file_name, vector):
     return scores
 
 
-def search_index(text, index_files, count=20):
+def search_index(text, index_files, source_count=5):
     vector = gpt3_embedding(text)
     scores = []
     jobs = []
@@ -66,7 +66,7 @@ def search_index(text, index_files, count=20):
 
     print("Done Scoring")
     ordered = sorted(scores, key=lambda d: d['score'], reverse=True)
-    return ordered[0:count]
+    return ordered[0:source_count]
 
 
 def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, tokens=2000, freq_pen=0.25, pres_pen=0.0,
@@ -120,6 +120,7 @@ def queryGPT(text):
             answer = gpt3_completion(prompt)
             print('\n\n', answer)
             answers.append({'answer': answer, 'source': result['source'], 'link': result['link']})
+            print("Score: " + str(result['score']))
         # summarize the answers together
         all_answers = '\n\n'.join([answer_dict['answer'] for answer_dict in answers])
         chunks = textwrap.wrap(all_answers, 10000)
