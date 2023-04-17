@@ -28,20 +28,20 @@ def similarity(v1, v2):  # return dot product of two vectors
     return np.dot(v1, v2)
 
 
-def worker(data, file_name, vector):
+def worker(data, file_name, vector, results):
     scores = []
     for i in data:
         score = similarity(vector, i['vector'])
         scores.append({'content': i['content'], 'score': score, 'source': file_name, 'link': get_pdf_link(file_name)})
-    return scores
+    results.extend(scores)
 
 
 def search_index(text, index_files, source_count=5):
     vector = gpt3_embedding(text)
     scores = []
     jobs = []
-    # create a pool of workers
-    pool = mp.Pool(processes=1)
+    results = mp.Manager().list()
+
     # Loop through each index file in index folder
     for index_file in index_files:
         # Download and open index file
@@ -53,19 +53,17 @@ def search_index(text, index_files, source_count=5):
 
         file_name = os.path.splitext(os.path.basename(index_file['name']))[0]
         print("Scoring")
-        # submit job to worker pool
-        job = pool.apply_async(worker, args=(data, file_name, vector))
-        jobs.append(job)
-    # wait for all jobs to complete
-    pool.close()
-    pool.join()
+        # create a process for each worker
+        p = mp.Process(target=worker, args=(data, file_name, vector, results))
+        jobs.append(p)
+        p.start()
 
-    # combine all the scores
+    # wait for all processes to complete
     for job in jobs:
-        scores.extend(job.get())
+        job.join()
 
     print("Done Scoring")
-    ordered = sorted(scores, key=lambda d: d['score'], reverse=True)
+    ordered = sorted(results, key=lambda d: d['score'], reverse=True)
     return ordered[0:source_count]
 
 
