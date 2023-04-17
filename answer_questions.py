@@ -28,50 +28,35 @@ def similarity(v1, v2):  # return dot product of two vectors
     return np.dot(v1, v2)
 
 
+def search_index(text, index_files, count=5):
+    vector = gpt3_embedding(text)
+    scores = list()
+    # Loop through each index file in index folder
+    for index_file in index_files:
+        print("Downloading")
+        # Download and open index file
+        download_file_from_drive(index_file['id'], "index.json")
+        with open('index.json', 'r') as infile:
+            data = json.load(infile)
+
+        print("Done downloading")
+        print("Scoring")
+        for i in data:
+            score = similarity(vector, i['vector'])
+            #print(score)
+            file_name = os.path.splitext(os.path.basename(index_file['name']))[0]
+            scores.append({'content': i['content'], 'score': score, 'source': file_name, 'link': get_pdf_link(file_name)})
+        print("Done scoring")
+    ordered = sorted(scores, key=lambda d: d['score'], reverse=True)
+    return ordered[0:count]
+
+
 def worker(data, file_name, vector, results):
     scores = []
     for i in data:
         score = similarity(vector, i['vector'])
         scores.append({'content': i['content'], 'score': score, 'source': file_name, 'link': get_pdf_link(file_name)})
     results.extend(scores)
-
-
-def search_index(text, index_files, source_count=5):
-    vector = gpt3_embedding(text)
-    scores = []
-    jobs = []
-    ordered_results = []
-
-    # Loop through each index file in index folder
-    for index_file in index_files:
-        # Download and open index file
-        print("Downloading")
-        download_file_from_drive(index_file['id'], "index.json")
-        print("Done Downloading")
-        with open('index.json', 'r') as infile:
-            data = json.load(infile)
-
-        file_name = os.path.splitext(os.path.basename(index_file['name']))[0]
-        print("Scoring")
-        # create a manager for each process and pass it to the worker
-        manager = mp.Manager()
-        results = manager.list()
-        p = mp.Process(target=worker, args=(data, file_name, vector, results))
-        jobs.append(p)
-        p.start()
-
-        # add the manager's list to the ordered results list
-        ordered_results.append(results)
-
-    # wait for all processes to complete
-    for job in jobs:
-        job.join()
-
-    print("Done Scoring")
-    # combine the results from each process and sort them
-    combined_results = [item for sublist in ordered_results for item in sublist]
-    ordered = sorted(combined_results, key=lambda d: d['score'], reverse=True)
-    return ordered[0:source_count]
 
 
 def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, tokens=2000, freq_pen=0.25, pres_pen=0.0,
