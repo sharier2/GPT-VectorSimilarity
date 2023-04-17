@@ -28,35 +28,45 @@ def similarity(v1, v2):  # return dot product of two vectors
     return np.dot(v1, v2)
 
 
-def search_index(text, index_files, count=5):
-    vector = gpt3_embedding(text)
-    scores = list()
-    # Loop through each index file in index folder
-    for index_file in index_files:
-        print("Downloading")
-        # Download and open index file
-        download_file_from_drive(index_file['id'], "index.json")
-        with open('index.json', 'r') as infile:
-            data = json.load(infile)
-
-        print("Done downloading")
-        print("Scoring")
-        for i in data:
-            score = similarity(vector, i['vector'])
-            #print(score)
-            file_name = os.path.splitext(os.path.basename(index_file['name']))[0]
-            scores.append({'content': i['content'], 'score': score, 'source': file_name, 'link': get_pdf_link(file_name)})
-        print("Done scoring")
-    ordered = sorted(scores, key=lambda d: d['score'], reverse=True)
-    return ordered[0:count]
-
-
-def worker(data, file_name, vector, results):
+def worker(data, file_name, vector):
     scores = []
     for i in data:
         score = similarity(vector, i['vector'])
         scores.append({'content': i['content'], 'score': score, 'source': file_name, 'link': get_pdf_link(file_name)})
-    results.extend(scores)
+    return scores
+
+
+def search_index(text, index_files, source_count=5):
+    vector = gpt3_embedding(text)
+    scores = []
+    jobs = []
+    # create a pool of workers
+    pool = mp.Pool(processes=9)
+    # Loop through each index file in index folder
+    for index_file in index_files:
+        # Download and open index file
+        print("Downloading")
+        download_file_from_drive(index_file['id'], "index.json")
+        print("Done Downloading")
+        with open('index.json', 'r') as infile:
+            data = json.load(infile)
+
+        file_name = os.path.splitext(os.path.basename(index_file['name']))[0]
+        print("Scoring")
+        # submit job to worker pool
+        job = pool.apply_async(worker, args=(data, file_name, vector))
+        jobs.append(job)
+    # wait for all jobs to complete
+    pool.close()
+    pool.join()
+
+    # combine all the scores
+    for job in jobs:
+        scores.extend(job.get())
+
+    print("Done Scoring")
+    ordered = sorted(scores, key=lambda d: d['score'], reverse=True)
+    return ordered[0:source_count]
 
 
 def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, tokens=2000, freq_pen=0.25, pres_pen=0.0,
