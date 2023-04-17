@@ -41,7 +41,7 @@ def search_index(text, index_files, source_count=5):
     scores = []
     jobs = []
     # create a pool of workers
-    pool = mp.Pool(processes=4)
+    pool = mp.Pool(processes=1)
     # Loop through each index file in index folder
     for index_file in index_files:
         # Download and open index file
