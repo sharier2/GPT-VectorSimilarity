@@ -27,12 +27,14 @@ def gpt3_embedding(content, engine='text-similarity-ada-001'):
 def similarity(v1, v2):  # return dot product of two vectors
     return np.dot(v1, v2)
 
-
-def worker(data, file_name, vector):
+# confidence for relevant data is typically around 0.70, irrelevant data is typically below 0.68
+def worker(data, file_name, vector, confidence_limit=0.69):
     scores = []
     for i in data:
         score = similarity(vector, i['vector'])
-        scores.append({'content': i['content'], 'score': score, 'source': file_name, 'link': get_pdf_link(file_name)})
+        if score >= confidence_limit:
+            scores.append(
+                {'content': i['content'], 'score': score, 'source': file_name, 'link': get_pdf_link(file_name)})
     return scores
 
 
@@ -123,9 +125,12 @@ def queryGPT(text):
             print("Score: " + str(result['score']))
         # summarize the answers together
         all_answers = '\n\n'.join([answer_dict['answer'] for answer_dict in answers])
+        if len(answers) == 0:
+            all_answers = "No research within the database is relevant to your question."
         chunks = textwrap.wrap(all_answers, 10000)
         final = list()
         for chunk in chunks:
+            print("Chunk")
             prompt = open_file('prompt_summary.txt').replace('<<SUMMARY>>', chunk)
             summary = gpt3_completion(prompt)
             final.append(summary)
