@@ -16,7 +16,7 @@ openai.api_key = config("APIKEY")
 
 
 def gpt3_embedding(content, engine='text-similarity-ada-001'):
-    retry = 0;
+    retry = 0
     max_retry = 5
     while True:
         try:
@@ -34,7 +34,8 @@ def gpt3_embedding(content, engine='text-similarity-ada-001'):
 
 def build_index(research_file='research.txt'):
     alltext = open_file(research_file)
-    chunks = textwrap.wrap(alltext, 4000)
+    chunk_size = config("CHUNK_SIZE")
+    chunks = textwrap.wrap(alltext, chunk_size)
     result = list()
     for chunk in chunks:
         embedding = gpt3_embedding(chunk.encode(encoding='ASCII', errors='ignore').decode())

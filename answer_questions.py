@@ -108,18 +108,14 @@ def queryGPT(text):
     update_google_drive_folders()
     # Get all files within the index folder
     index_files = get_files_from_drive_folder(INDEX_FOLDER_ID)
-    # with open('index.json', 'r') as infile:
-    # data = json.load(infile)
-    # print(data)
     while True:
-        # query = input("Enter your question here: ")
-        # print(query)
         # Get search results, searching through every index in the index folder
         results = search_index(text, index_files)
         answers = list()
         # answer the same question for all returned chunks
         for result in results:
-            prompt = open_file('prompt_answer.txt').replace('<<PASSAGE>>', result['content']).replace('<<QUERY>>', text)
+            prompt_answer_path = config("PROMPT_ANS_PATH")
+            prompt = open_file(prompt_answer_path).replace('<<PASSAGE>>', result['content']).replace('<<QUERY>>', text)
             answer = gpt3_completion(prompt)
             print('\n\n', answer)
             answers.append({'answer': answer, 'source': result['source'], 'link': result['link']})
@@ -128,11 +124,13 @@ def queryGPT(text):
         all_answers = '\n\n'.join([answer_dict['answer'] for answer_dict in answers])
         if len(answers) == 0:
             all_answers = "No research within the database is relevant to your question."
-        chunks = textwrap.wrap(all_answers, 10000)
+        chunk_size = 10000
+        chunks = textwrap.wrap(all_answers, chunk_size)
         final = list()
         for chunk in chunks:
             print("Chunk")
-            prompt = open_file('prompt_summary.txt').replace('<<SUMMARY>>', chunk)
+            prompt_summary_path = config("PROMPT_SUMM_PATH")
+            prompt = open_file(prompt_summary_path).replace('<<SUMMARY>>', chunk)
             summary = gpt3_completion(prompt)
             final.append(summary)
         print('\n\n=========\n\n', '\n\n'.join(final))
