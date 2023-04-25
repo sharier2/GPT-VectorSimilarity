@@ -6,16 +6,17 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
+from decouple import config
 import fitz # PyMuPDF
 
 # ID of folder containing pdf's
-PDF_FOLDER_ID = '1rBMK7jStTpsJDNLIJaznlJH3cMB218h-'
+PDF_FOLDER_ID = config("PDF_FOLDER_ID")
 
 # ID of folder for txt's
-TXT_FOLDER_ID = '1rNZrv06u_kg9zdoa6D-i82zFfk1QE1tB'
+TXT_FOLDER_ID = config("TXT_FOLDER_ID")
 
 # ID of folder for indexes
-INDEX_FOLDER_ID = '1Jsn9j_Sp_nvpiY1ZiACpDf_nAQkI98sQ'
+INDEX_FOLDER_ID = config("INDEX_FOLDER_ID")
 
 # Service account credentials
 CREDS = service_account.Credentials.from_service_account_file('credentials.json')
@@ -76,13 +77,16 @@ def upload_file_to_drive_folder(folder_id, file_path, actual_file_name, ext):
         print(f'An error occurred: {error}')
 
 def download_file_from_drive(file_id, file_path):
+    try:
     # Download the PDF file contents
-    request = SERVICE.files().get_media(fileId=file_id)
-    file_contents = io.BytesIO(request.execute())
+        request = SERVICE.files().get_media(fileId=file_id)
+        file_contents = io.BytesIO(request.execute())
 
     # Write the PDF file contents to a file
-    with open('./{}'.format("./" + file_path), 'wb') as f:
-        shutil.copyfileobj(file_contents, f)
+        with open('./{}'.format("./" + file_path), 'wb') as f:
+            shutil.copyfileobj(file_contents, f)
+    except HttpError as error:
+        print(f'An error occurred: {error}')
 
 def get_files_from_drive_folder(folder_id):
     # Define the query to search for files in the folder
