@@ -27,6 +27,7 @@ def gpt3_embedding(content, engine='text-similarity-ada-001'):
 def similarity(v1, v2):  # return dot product of two vectors
     return np.dot(v1, v2)
 
+
 # confidence for relevant data is typically around 0.70, irrelevant data is typically below 0.68
 def worker(data, file_name, vector, confidence_limit=0.69):
     scores = []
