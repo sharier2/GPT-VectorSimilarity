@@ -1,4 +1,4 @@
-from time import time,sleep
+from time import time, sleep
 import openai
 import json
 import textwrap
@@ -30,7 +30,6 @@ def gpt3_embedding(content, engine='text-similarity-ada-001'):
                 return "GPT3 error: %s" % oops
             print('Error communicating with OpenAI:', oops)
             sleep(5)
-
 
 
 def build_index(research_file='research.txt'):

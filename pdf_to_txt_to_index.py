@@ -6,7 +6,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
-import fitz # PyMuPDF
+import fitz  # PyMuPDF
 
 # ID of folder containing pdf's
 PDF_FOLDER_ID = '1rBMK7jStTpsJDNLIJaznlJH3cMB218h-'
@@ -26,7 +26,7 @@ SERVICE = build('drive', 'v3', credentials=CREDS)
 
 def get_pdf_link(file_name):
     try:
-        file_name  = file_name + ".pdf"
+        file_name = file_name + ".pdf"
         # Query the PDF folder to retrieve the PDF files
         query = f"'{PDF_FOLDER_ID}' in parents and trashed = false and mimeType = 'application/pdf' and name = '{file_name}'"
         response = SERVICE.files().list(q=query, fields='files(id, webContentLink)').execute()
@@ -54,6 +54,7 @@ def pdf_to_txt(pdf_path, txt_path):
         txt.write(text)
     return txt_path
 
+
 def pdf_exists_as_txt(pdf_name, txt_files):
     for txt_file in txt_files:
         txt_file_name_without_ext = os.path.splitext(os.path.basename(txt_file['name']))[0]
@@ -61,6 +62,7 @@ def pdf_exists_as_txt(pdf_name, txt_files):
             return True
 
     return False
+
 
 def upload_file_to_drive_folder(folder_id, file_path, actual_file_name, ext):
     try:
@@ -75,6 +77,7 @@ def upload_file_to_drive_folder(folder_id, file_path, actual_file_name, ext):
     except HttpError as error:
         print(f'An error occurred: {error}')
 
+
 def download_file_from_drive(file_id, file_path):
     # Download the PDF file contents
     request = SERVICE.files().get_media(fileId=file_id)
@@ -83,6 +86,7 @@ def download_file_from_drive(file_id, file_path):
     # Write the PDF file contents to a file
     with open('./{}'.format("./" + file_path), 'wb') as f:
         shutil.copyfileobj(file_contents, f)
+
 
 def get_files_from_drive_folder(folder_id):
     # Define the query to search for files in the folder
@@ -113,7 +117,6 @@ def update_google_drive_folders():
 
                 # Check if the file is a PDF and doesnt already exitst as a txt
                 if file_mime_type == 'application/pdf' and not pdf_exists_as_txt(file_name_without_ext, txt_files):
-
                     print('Converting \"' + file_name_without_ext + '\" to txt...')
 
                     download_file_from_drive(file_id, "research.pdf")
@@ -137,8 +140,7 @@ def update_google_drive_folders():
             except HttpError as error:
                 print('An error occurred: {}'.format(error))
 
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     update_google_drive_folders()
-
-
