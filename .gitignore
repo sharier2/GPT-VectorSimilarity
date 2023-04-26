@@ -8,3 +8,7 @@ research.txt
 __pycache__/
 gpt3_logs/
 index.json
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
