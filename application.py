@@ -3,7 +3,7 @@ import openai
 import answer_questions
 from decouple import config
 
-app = Flask(__name__)
+application = app = Flask(__name__)
 
 
 @app.route('/')
