@@ -1,4 +1,4 @@
-from application import website
+from application import application
 
 if __name__ == "main":
-    website.run()
+    application.run()
