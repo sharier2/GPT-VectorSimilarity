@@ -101,6 +101,10 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, toke
             print('Error communicating with OpenAI:', oops)
             sleep(1)
 
+def get_summary_of_answers(chunk, prompt_summary_path):
+    print("Chunk")
+    prompt = open_file(prompt_summary_path).replace('<<SUMMARY>>', chunk)
+    summary = gpt3_completion(prompt)
 
 def queryGPT(text):
     openai.api_key = config("APIKEY")
@@ -112,9 +116,10 @@ def queryGPT(text):
         # Get search results, searching through every index in the index folder
         results = search_index(text, index_files)
         answers = list()
+        prompt_answer_path = config("PROMPT_ANS_PATH")
         # answer the same question for all returned chunks
         for result in results:
-            prompt_answer_path = config("PROMPT_ANS_PATH")
+
             prompt = open_file(prompt_answer_path).replace('<<PASSAGE>>', result['content']).replace('<<QUERY>>', text)
             answer = gpt3_completion(prompt)
             print('\n\n', answer)
@@ -127,12 +132,9 @@ def queryGPT(text):
         chunk_size = 10000
         chunks = textwrap.wrap(all_answers, chunk_size)
         final = list()
+        prompt_summary_path = config("PROMPT_SUMM_PATH")
         for chunk in chunks:
-            print("Chunk")
-            prompt_summary_path = config("PROMPT_SUMM_PATH")
-            prompt = open_file(prompt_summary_path).replace('<<SUMMARY>>', chunk)
-            summary = gpt3_completion(prompt)
-            final.append(summary)
+            final.append(get_summary_of_answers(chunk, prompt_summary_path))
         print('\n\n=========\n\n', '\n\n'.join(final))
         return final, answers
 

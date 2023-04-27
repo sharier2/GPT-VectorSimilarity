@@ -100,6 +100,27 @@ def get_files_from_drive_folder(folder_id):
     results = SERVICE.files().list(q=query, fields="nextPageToken, files(id, name, mimeType)").execute()
     return results.get('files', [])
 
+def convert_pdf(file_name_without_ext, file_id, file_name):
+    print('Converting \"' + file_name_without_ext + '\" to txt...')
+
+    download_file_from_drive(file_id, "research.pdf")
+
+    pdf_to_txt("research.pdf", "research.txt")
+
+    # Upload txt file to google drive folder
+    upload_file_to_drive_folder(TXT_FOLDER_ID, "research.txt", file_name_without_ext, '.txt')
+
+    print('Converted file: {} to txt'.format(file_name))
+
+    print('Converting \"' + file_name_without_ext + '\" to index...')
+
+    build_index('research.txt')
+
+    # Upload index to google drive folder
+    upload_file_to_drive_folder(INDEX_FOLDER_ID, "index.json", file_name_without_ext, '.json')
+
+    print('Converted file: {} to index'.format(file_name))
+
 
 def update_google_drive_folders():
     # Get all files within the pdf folder
@@ -121,25 +142,7 @@ def update_google_drive_folders():
 
                 # Check if the file is a PDF and doesnt already exitst as a txt
                 if file_mime_type == 'application/pdf' and not pdf_exists_as_txt(file_name_without_ext, txt_files):
-                    print('Converting \"' + file_name_without_ext + '\" to txt...')
-
-                    download_file_from_drive(file_id, "research.pdf")
-
-                    pdf_to_txt("research.pdf", "research.txt")
-
-                    # Upload txt file to google drive folder
-                    upload_file_to_drive_folder(TXT_FOLDER_ID, "research.txt", file_name_without_ext, '.txt')
-
-                    print('Converted file: {} to txt'.format(file_name))
-
-                    print('Converting \"' + file_name_without_ext + '\" to index...')
-
-                    build_index('research.txt')
-
-                    # Upload index to google drive folder
-                    upload_file_to_drive_folder(INDEX_FOLDER_ID, "index.json", file_name_without_ext, '.json')
-
-                    print('Converted file: {} to index'.format(file_name))
+                    convert_pdf(file_name_without_ext, file_id, file_name)
 
             except HttpError as error:
                 print('An error occurred: {}'.format(error))
