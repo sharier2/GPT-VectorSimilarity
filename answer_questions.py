@@ -25,7 +25,6 @@ def gpt3_embedding(content, engine='text-similarity-ada-001'):
     except Exception as error:
         print('An error occurred: {}'.format(error))
 
-
     return vector
 
 
@@ -106,10 +105,12 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, toke
             print('Error communicating with OpenAI:', oops)
             sleep(1)
 
+
 def get_summary_of_answers(chunk, prompt_summary_path):
     print("Chunk")
     prompt = open_file(prompt_summary_path).replace('<<SUMMARY>>', chunk)
     return gpt3_completion(prompt)
+
 
 def queryGPT(text):
     openai.api_key = config("APIKEY")
@@ -117,32 +118,30 @@ def queryGPT(text):
     update_google_drive_folders()
     # Get all files within the index folder
     index_files = get_files_from_drive_folder(INDEX_FOLDER_ID)
-    #Get chunk size from env
+    # Get chunk size from env
     chunk_size = int(config("CHUNK_SIZE"))
-    while True:
-        # Get search results, searching through every index in the index folder
-        results = search_index(text, index_files)
-        answers = list()
-        prompt_answer_path = config("PROMPT_ANS_PATH")
-        # answer the same question for all returned chunks
-        for result in results:
-
-            prompt = open_file(prompt_answer_path).replace('<<PASSAGE>>', result['content']).replace('<<QUERY>>', text)
-            answer = gpt3_completion(prompt)
-            print('\n\n', answer)
-            answers.append({'answer': answer, 'source': result['source'], 'link': result['link']})
-            print("Score: " + str(result['score']))
-        # summarize the answers together
-        all_answers = '\n\n'.join([answer_dict['answer'] for answer_dict in answers])
-        if len(answers) == 0:
-            all_answers = "No research within the database is relevant to your question."
-        chunks = textwrap.wrap(all_answers, chunk_size)
-        final = list()
-        prompt_summary_path = config("PROMPT_SUMM_PATH")
-        for chunk in chunks:
-            final.append(get_summary_of_answers(chunk, prompt_summary_path))
-        print('\n\n=========\n\n', '\n\n'.join(final))
-        return final, answers
+    # Get search results, searching through every index in the index folder
+    results = search_index(text, index_files)
+    answers = list()
+    prompt_answer_path = config("PROMPT_ANS_PATH")
+    # answer the same question for all returned chunks
+    for result in results:
+        prompt = open_file(prompt_answer_path).replace('<<PASSAGE>>', result['content']).replace('<<QUERY>>', text)
+        answer = gpt3_completion(prompt)
+        print('\n\n', answer)
+        answers.append({'answer': answer, 'source': result['source'], 'link': result['link']})
+        print("Score: " + str(result['score']))
+    # summarize the answers together
+    all_answers = '\n\n'.join([answer_dict['answer'] for answer_dict in answers])
+    if len(answers) == 0:
+        all_answers = "No research within the database is relevant to your question."
+    chunks = textwrap.wrap(all_answers, chunk_size)
+    final = list()
+    prompt_summary_path = config("PROMPT_SUMM_PATH")
+    for chunk in chunks:
+        final.append(get_summary_of_answers(chunk, prompt_summary_path))
+    print('\n\n=========\n\n', '\n\n'.join(final))
+    return final, answers
 
 
 if __name__ == '__main__':
