@@ -117,6 +117,8 @@ def queryGPT(text):
     update_google_drive_folders()
     # Get all files within the index folder
     index_files = get_files_from_drive_folder(INDEX_FOLDER_ID)
+    #Get chunk size from env
+    chunk_size = int(config("CHUNK_SIZE"))
     while True:
         # Get search results, searching through every index in the index folder
         results = search_index(text, index_files)
@@ -134,7 +136,6 @@ def queryGPT(text):
         all_answers = '\n\n'.join([answer_dict['answer'] for answer_dict in answers])
         if len(answers) == 0:
             all_answers = "No research within the database is relevant to your question."
-        chunk_size = 10000
         chunks = textwrap.wrap(all_answers, chunk_size)
         final = list()
         prompt_summary_path = config("PROMPT_SUMM_PATH")
