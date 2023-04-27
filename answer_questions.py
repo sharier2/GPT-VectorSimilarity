@@ -104,7 +104,7 @@ def gpt3_completion(prompt, engine='text-davinci-002', temp=0.6, top_p=1.0, toke
 def get_summary_of_answers(chunk, prompt_summary_path):
     print("Chunk")
     prompt = open_file(prompt_summary_path).replace('<<SUMMARY>>', chunk)
-    summary = gpt3_completion(prompt)
+    return gpt3_completion(prompt)
 
 def queryGPT(text):
     openai.api_key = config("APIKEY")
