@@ -18,9 +18,14 @@ def open_file(filepath):
 
 
 def gpt3_embedding(content, engine='text-similarity-ada-001'):
-    content = content.encode(encoding='ASCII', errors='ignore').decode()
-    response = openai.Embedding.create(input=content, engine=engine)
-    vector = response['data'][0]['embedding']  # this is a normal list
+    try:
+        content = content.encode(encoding='ASCII', errors='ignore').decode()
+        response = openai.Embedding.create(input=content, engine=engine)
+        vector = response['data'][0]['embedding']  # this is a normal list
+    except Exception as error:
+        print('An error occurred: {}'.format(error))
+
+
     return vector
 
 

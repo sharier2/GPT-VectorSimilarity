@@ -47,12 +47,16 @@ def get_pdf_link(file_name):
 
 
 def pdf_to_txt(pdf_path, txt_path):
-    with fitz.open(pdf_path) as pdf:
-        text = ""
-        for page in pdf:
-            text += page.get_text()
-    with open(txt_path, "w", encoding="utf-8") as txt:
-        txt.write(text)
+    try:
+        with fitz.open(pdf_path) as pdf:
+            text = ""
+            for page in pdf:
+                text += page.get_text()
+        with open(txt_path, "w", encoding="utf-8") as txt:
+            txt.write(text)
+    except HttpError as error:
+        print('An error occurred: {}'.format(error))
+
     return txt_path
 
 
@@ -95,9 +99,12 @@ def download_file_from_drive(file_id, file_path):
 def get_files_from_drive_folder(folder_id):
     # Define the query to search for files in the folder
     query = "'{}' in parents".format(folder_id)
-
+    try:
+        results = SERVICE.files().list(q=query, fields="nextPageToken, files(id, name, mimeType)").execute()
+    except HttpError as error:
+        print('An error occurred: {}'.format(error))
     # Execute the query
-    results = SERVICE.files().list(q=query, fields="nextPageToken, files(id, name, mimeType)").execute()
+
     return results.get('files', [])
 
 def convert_pdf(file_name_without_ext, file_id, file_name):
